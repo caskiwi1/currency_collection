@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collection</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='icon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="site-title">
+                <img src="{{ url_for('static', filename='icon.jpg') }}" alt="Icon" class="site-icon">
+                <h1>Country Currency Collection</h1>
+            </a>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="{{ url_for('collection') }}">Collection</a></li>
+                <li><a href="{{ url_for('countries') }}">Countries</a></li>
+                <li><a href="{{ url_for('manage_collection') }}">Manage Collection</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    {% block home %}
+    {% endblock %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026. All rights reserved.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Countries</h2>
+</div>
+
+<div class="countries-grid">
+    {% for country in countries %}
+    {% if country.country == 'Y' %}  {# only show actual countries #}
+    <div class="country-card">
+        <div class="country-header">
+            <h3><a href="https://en.wikipedia.org/wiki/{{ country.name|replace(' ', '_') }}" target="_blank">{{ country.name }}</a></h3>
+        </div>
+        <div class="country-body">
+            <div class="currencies-section">
+                <p class="section-title">Currency</p>
+                <ul class="currency-list">
+                    {% for currency in country.currencies %}
+                    <li><a href="{{ url_for('currency_detail', currency_id=currency.currency_id) }}" class="currency-link"><span class="currency-badge">{{ currency.code }}</span> {{ currency.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if country.collections|length > 0 %}
+            <p class="collected">✅ Collected</p>
+            {% else %}
+            <p class="not-collected">❌ Not Collected</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% endblock %}

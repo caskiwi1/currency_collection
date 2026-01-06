@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Collection</h2>
+</div>
+
+<div class="collection-menu">
+    <a href="{{ url_for('collection', type='note') }}" class="{% if filter_type=='note' %}active{% endif %}">Notes</a>
+    <a href="{{ url_for('collection', type='coin') }}" class="{% if filter_type=='coin' %}active{% endif %}">Coins</a>
+</div>
+
+{% if items %}
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search" class="search-input">
+</div>
+
+<table class="collection-table">
+    <thead>
+        <tr>
+            <th>Currency</th>
+            <th>Code</th>
+            <th>Country</th>
+            {% if filter_type != 'coin' %}
+            <th>Amount</th>
+            {% endif %}
+            <th>Source</th>
+        </tr>
+    </thead>
+    <tbody id="tableBody">
+        {% for item in items %}
+        <tr class="table-row">
+            <td><a href="{{ url_for('currency_detail', currency_id=item.currency.currency_id) }}" class="currency-link">{{ item.currency.name }}</a></td>
+            <td>{{ item.currency.code }}</td>
+            <td><a href="https://en.wikipedia.org/wiki/{{ item.place.name|replace(' ', '_') }}" target="_blank">{{ item.place.name }}</a></td>
+            {% if filter_type != 'coin' %}
+            <td>{{ item.amount if item.amount else '-' }}</td>
+            {% endif %}
+            <td>{{ item.source or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('.table-row');
+        let visibleRows = 0;
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Show/hide no results message
+        const tbody = document.getElementById('tableBody');
+        let noResultsMsg = document.querySelector('.no-results');
+        if (visibleRows === 0 && searchTerm !== '') {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('tr');
+                noResultsMsg.className = 'no-results';
+                noResultsMsg.innerHTML = '<td colspan="100%" style="text-align: center; padding: 1rem; color: #999;">No results found</td>';
+                tbody.appendChild(noResultsMsg);
+            }
+            noResultsMsg.style.display = '';
+        } else if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+        }
+    });
+</script>
+{% else %}
+<p>No items in this collection.</p>
+{% endif %}
+
+{% endblock %}
