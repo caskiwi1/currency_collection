@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='docs')
 
 # Use environment variable for secret key in production, random for development
 app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
