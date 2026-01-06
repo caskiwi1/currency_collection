@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="manage-container">
+    <div class="page-header">
+        <h2 class="page-title">Manage Collection</h2>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Action selection menu -->
+    <div class="action-menu">
+        <a href="{{ url_for('manage_collection', action='add') }}" class="action-tab {% if action=='add' %}active{% endif %}">
+            Add Item
+        </a>
+        <a href="{{ url_for('manage_collection', action='edit') }}" class="action-tab {% if action=='edit' %}active{% endif %}">
+            Edit Item
+        </a>
+        <a href="{{ url_for('manage_collection', action='delete') }}" class="action-tab {% if action=='delete' %}active{% endif %}">
+            Delete Item
+        </a>
+        <a href="{{ url_for('manage_collection', action='add_place') }}" class="action-tab {% if action=='add_place' %}active{% endif %}">
+            Add Place
+        </a>
+        <a href="{{ url_for('manage_collection', action='edit_place') }}" class="action-tab {% if action=='edit_place' %}active{% endif %}">
+            Edit Place
+        </a>
+        <a href="{{ url_for('manage_collection', action='delete_place') }}" class="action-tab {% if action=='delete_place' %}active{% endif %}">
+            Delete Place
+        </a>
+        <a href="{{ url_for('manage_collection', action='add_currency') }}" class="action-tab {% if action=='add_currency' %}active{% endif %}">
+            Add Currency
+        </a>
+        <a href="{{ url_for('manage_collection', action='edit_currency') }}" class="action-tab {% if action=='edit_currency' %}active{% endif %}">
+            Edit Currency
+        </a>
+        <a href="{{ url_for('manage_collection', action='delete_currency') }}" class="action-tab {% if action=='delete_currency' %}active{% endif %}">
+            Delete Currency
+        </a>
+    </div>
+
+    <div class="form-container">
+        {% if action == 'add_place' %}
+        <h3 class="form-title">Add New Place</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="place_name">Place Name:</label>
+                <input type="text" id="place_name" name="place_name" required placeholder="Enter place name">
+            </div>
+            
+            <div class="form-group">
+                <label for="is_country">Is this a current country?</label>
+                <select id="is_country" name="is_country" required>
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">Add Place</button>
+        </form>
+
+        {% elif action == 'edit_place' %}
+        <h3 class="form-title">Edit Place</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="place_id">Select Place:</label>
+                <select id="place_id" name="place_id" required onchange="fillPlaceData()">
+                    <option value="">-- Select a place --</option>
+                    {% for place in places %}
+                    <option value="{{ place.place_id }}" data-name="{{ place.name }}" data-country="{{ place.country }}">{{ place.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="place_name">Place Name:</label>
+                <input type="text" id="place_name" name="place_name" required placeholder="Enter place name">
+            </div>
+            
+            <div class="form-group">
+                <label for="is_country">Is this a current country?</label>
+                <select id="is_country" name="is_country" required>
+                    <option value="Y">Yes</option>
+                    <option value="N">No</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn">Update Place</button>
+        </form>
+
+        {% elif action == 'delete_place' %}
+        <h3 class="form-title">Delete Place</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="place_id">Select Place to Delete:</label>
+                <select id="place_id" name="place_id" required>
+                    <option value="">-- Select a place --</option>
+                    {% for place in places %}
+                    <option value="{{ place.place_id }}">{{ place.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn delete-btn">Delete Place</button>
+        </form>
+
+        {% elif action == 'add_currency' %}
+        <h3 class="form-title">Add New Currency</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="currency_code">Currency Code:</label>
+                <input type="text" id="currency_code" name="currency_code" required placeholder="e.g., USD">
+            </div>
+            
+            <div class="form-group">
+                <label for="currency_name">Currency Name:</label>
+                <input type="text" id="currency_name" name="currency_name" required placeholder="e.g., US Dollar">
+            </div>
+            
+            <div class="form-group">
+                <label for="place_ids">Select Place(s):</label>
+                <select id="place_ids" name="place_ids" multiple required size="5">
+                    {% for place in places %}
+                    <option value="{{ place.place_id }}">{{ place.name }}</option>
+                    {% endfor %}
+                </select>
+                <small>Hold Ctrl to select multiple places</small>
+            </div>
+            
+            <button type="submit" class="submit-btn">Add Currency</button>
+        </form>
+
+        {% elif action == 'edit_currency' %}
+        <h3 class="form-title">Edit Currency</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="currency_id">Select Currency:</label>
+                <select id="currency_id" name="currency_id" required onchange="fillCurrencyData()">
+                    <option value="">-- Select a currency --</option>
+                    {% for currency in currencies %}
+                    <option value="{{ currency.currency_id }}" data-code="{{ currency.code }}" data-name="{{ currency.name }}" data-places="{{ currency.countries|map(attribute='place_id')|list|join(',') }}">{{ currency.name }} ({{ currency.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="currency_code">Currency Code:</label>
+                <input type="text" id="currency_code" name="currency_code" required placeholder="e.g., USD">
+            </div>
+            
+            <div class="form-group">
+                <label for="currency_name">Currency Name:</label>
+                <input type="text" id="currency_name" name="currency_name" required placeholder="e.g., US Dollar">
+            </div>
+            
+            <div class="form-group">
+                <label for="place_ids">Select Place(s):</label>
+                <select id="place_ids" name="place_ids" multiple required size="5">
+                    {% for place in places %}
+                    <option value="{{ place.place_id }}">{{ place.name }}</option>
+                    {% endfor %}
+                </select>
+                <small>Hold Ctrl (or Cmd) to select multiple places</small>
+            </div>
+            
+            <button type="submit" class="submit-btn">Update Currency</button>
+        </form>
+
+        {% elif action == 'delete_currency' %}
+        <h3 class="form-title">Delete Currency</h3>
+        <form method="POST" class="manage-form">
+            <div class="form-group">
+                <label for="currency_id">Select Currency to Delete:</label>
+                <select id="currency_id" name="currency_id" required>
+                    <option value="">-- Select a currency --</option>
+                    {% for currency in currencies %}
+                    <option value="{{ currency.currency_id }}">{{ currency.name }} ({{ currency.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn delete-btn">Delete Currency</button>
+        </form>
+
+        {% else %}
+        <h3 class="form-title">
+            {% if action == 'add' %}Add Collection Item
+            {% elif action == 'edit' %}Edit Collection Item
+            {% else %}Delete Collection Item
+            {% endif %}
+        </h3>
+        <form method="POST" class="manage-form">
+            {% if action in ['edit', 'delete'] %}
+            <div class="form-group">
+                <label for="item_id">Select Item:</label>
+                <select id="item_id" name="item_id" required>
+                    <option value="">-- Select an item --</option>
+                    {% for item in items %}
+                    <option value="{{ item.id }}">{{ item.place.name }} - {{ item.currency.name }} - {{ item.type|capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            {% if action in ['add', 'edit'] %}
+            <div class="form-group">
+                <label for="currency_id">Currency:</label>
+                <select id="currency_id" name="currency_id" required>
+                    {% for currency in currencies %}
+                    <option value="{{ currency.currency_id }}">{{ currency.name }} ({{ currency.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="place_id">Place:</label>
+                <select id="place_id" name="place_id" required>
+                    {% for place in places %}
+                    <option value="{{ place.place_id }}">{{ place.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="type-select">Type:</label>
+                <select id="type-select" name="type" required onchange="toggleAmount()">
+                    <option value="coin">Coin</option>
+                    <option value="note">Note</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="amount-group">
+                <label id="amount-label" for="amount-input">Amount:</label>
+                <input type="number" id="amount-input" name="amount" placeholder="Enter amount">
+            </div>
+
+            <div class="form-group">
+                <label for="years">Year:</label>
+                <input type="text" id="years" name="years" placeholder="e.g., 2020">
+            </div>
+
+            <div class="form-group">
+                <label for="source">Source:</label>
+                <input type="text" id="source" name="source" >
+            </div>
+            {% endif %}
+
+            <button type="submit" class="submit-btn {% if action == 'delete' %}delete-btn{% endif %}">
+                {% if action == 'add' %}Add Item
+                {% elif action == 'edit' %}Update Item
+                {% else %}Delete Item
+                {% endif %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleAmount() {
+    const typeSelect = document.getElementById('type-select');
+    const amountGroup = document.getElementById('amount-group');
+    const amountInput = document.getElementById('amount-input');
+    
+    if (typeSelect && amountGroup && amountInput) {
+        if (typeSelect.value === 'coin') {
+            amountInput.disabled = true;
+            amountInput.value = '';
+            amountGroup.style.display = 'none';
+        } else {
+            amountInput.disabled = false;
+            amountGroup.style.display = 'block';
+        }
+    }
+}
+
+function fillPlaceData() {
+    const placeSelect = document.getElementById('place_id');
+    const selectedOption = placeSelect.options[placeSelect.selectedIndex];
+    
+    if (selectedOption.value) {
+        document.getElementById('place_name').value = selectedOption.dataset.name || '';
+        document.getElementById('is_country').value = selectedOption.dataset.country || 'N';
+    } else {
+        document.getElementById('place_name').value = '';
+        document.getElementById('is_country').value = 'N';
+    }
+}
+
+function fillCurrencyData() {
+    const currencySelect = document.getElementById('currency_id');
+    const selectedOption = currencySelect.options[currencySelect.selectedIndex];
+    
+    if (selectedOption.value) {
+        document.getElementById('currency_code').value = selectedOption.dataset.code || '';
+        document.getElementById('currency_name').value = selectedOption.dataset.name || '';
+        
+        // Set selected places
+        const placeIds = selectedOption.dataset.places ? selectedOption.dataset.places.split(',') : [];
+        const placeSelect = document.getElementById('place_ids');
+        if (placeSelect) {
+            Array.from(placeSelect.options).forEach(option => {
+                option.selected = placeIds.includes(option.value);
+            });
+        }
+    } else {
+        document.getElementById('currency_code').value = '';
+        document.getElementById('currency_name').value = '';
+        const placeSelect = document.getElementById('place_ids');
+        if (placeSelect) {
+            Array.from(placeSelect.options).forEach(option => {
+                option.selected = false;
+            });
+        }
+    }
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleAmount();
+});
+</script>
+
+{% endblock %}

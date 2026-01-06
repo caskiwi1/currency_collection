@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="currency-detail">
+    <div class="currency-header-section">
+        <h2>{{ currency.name }}</h2>
+        <p class="currency-code">Code: <strong>{{ currency.code }}</strong></p>
+    </div>
+
+    <div class="collection-status">
+        <h3>Collection Status</h3>
+        <div class="status-grid">
+            <div class="status-card {% if has_coins %}collected{% else %}not-collected{% endif %}">
+                <div class="status-icon"><img src="{{ url_for('static', filename='coin.jpg') }}" alt="Coin"></div>
+                <div class="status-label">Coins</div>
+                <div class="status-value">{% if has_coins %}✅ Collected{% else %}❌ Not Collected{% endif %}</div>
+            </div>
+            <div class="status-card {% if has_notes %}collected{% else %}not-collected{% endif %}">
+                <div class="status-icon"><img src="{{ url_for('static', filename='note.jpg') }}" alt="Note"></div>
+                <div class="status-label">Notes</div>
+                <div class="status-value">{% if has_notes %}✅ Collected{% else %}❌ Not Collected{% endif %}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="countries-section">
+        <h3>Countries Using This Currency</h3>
+        <div class="countries-list">
+            {% for country in countries %}
+            <div class="country-chip">
+                <a href="https://en.wikipedia.org/wiki/{{ country.name|replace(' ', '_') }}" target="_blank">
+                    {{ country.name }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if collected_items|length > 0 %}
+    <div class="collected-items-section">
+        <h3>Collected Items</h3>
+        <table class="collection-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Place</th>
+                    <th>Amount</th>
+                    <th>Source</th>
+                    <th>Years</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in collected_items %}
+                <tr>
+                    <td>{{ item.type|capitalize }}</td>
+                    <td>{{ item.place.name }}</td>
+                    <td>{% if item.type|lower == 'coin' %}-{% elif item.amount %}{{ item.amount }}{% else %}-{% endif %}</td>
+                    <td>{{ item.source or '-' }}</td>
+                    <td>{{ item.years or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
