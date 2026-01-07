@@ -296,7 +296,7 @@ def collection():
 @app.route('/countries')
 def countries():
     try:
-        # Only places where country='Y'
+        # Get both countries and places
         countries_list = Place.query.filter_by(country='Y').all()
         places_list = Place.query.filter_by(country='N').all()
     except Exception as e:

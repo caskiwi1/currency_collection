@@ -3,12 +3,13 @@
 {% block content %}
 <div class="page-header">
     <h2 class="page-title">Countries</h2>
+    <input type="text" id="searchInput" placeholder="Search countries, places, or currencies..." style="width: 100%; max-width: 500px; padding: 10px; margin: 15px 0; font-size: 16px; border: 1px solid #ccc; border-radius: 4px;">
 </div>
 
-<div class="countries-grid">
+<div class="countries-grid" id="countriesGrid">
     {% for country in countries %}
     {% if country.country == 'Y' %}  {# only show actual countries #}
-    <div class="country-card">
+    <div class="country-card" data-name="{{ country.name }}" data-currencies="{% for currency in country.currencies %}{{ currency.code }} {{ currency.name }} {% endfor %}">
         <div class="country-header">
             <h3><a href="https://en.wikipedia.org/wiki/{{ country.name|replace(' ', '_') }}" target="_blank">{{ country.name }}</a></h3>
         </div>
@@ -31,5 +32,53 @@
     {% endif %}
     {% endfor %}
 </div>
+
+<div class="page-header" style="margin-top: 40px;">
+    <h2 class="page-title">Places</h2>
+</div>
+
+<div class="countries-grid" id="placesGrid">
+    {% for place in places %}
+    <div class="country-card" data-name="{{ place.name }}" data-currencies="{% for currency in place.currencies %}{{ currency.code }} {{ currency.name }} {% endfor %}">
+        <div class="country-header">
+            <h3><a href="https://en.wikipedia.org/wiki/{{ place.name|replace(' ', '_') }}" target="_blank">{{ place.name }}</a></h3>
+        </div>
+        <div class="country-body">
+            <div class="currencies-section">
+                <p class="section-title">Currency</p>
+                <ul class="currency-list">
+                    {% for currency in place.currencies %}
+                    <li><a href="{{ url_for('currency_detail', currency_id=currency.currency_id) }}" class="currency-link"><span class="currency-badge">{{ currency.code }}</span> {{ currency.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if place.collections|length > 0 %}
+            <p class="collected">✅ Collected</p>
+            {% else %}
+            <p class="not-collected">❌ Not Collected</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const allCards = document.querySelectorAll('.country-card');
+    
+    allCards.forEach(card => {
+        const name = card.getAttribute('data-name').toLowerCase();
+        const currencies = card.getAttribute('data-currencies').toLowerCase();
+        const searchText = name + ' ' + currencies;
+        
+        if (searchText.includes(searchTerm)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+</script>
 
 {% endblock %}
