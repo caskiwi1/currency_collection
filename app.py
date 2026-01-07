@@ -298,11 +298,13 @@ def countries():
     try:
         # Only places where country='Y'
         countries_list = Place.query.filter_by(country='Y').all()
+        places_list = Place.query.filter_by(country='N').all()
     except Exception as e:
         print('DB query error:', e)
         countries_list = []
+        places_list = []
 
-    return render_template('countries.html', countries=countries_list)
+    return render_template('countries.html', countries=countries_list, places=places_list)
 
 
 @app.route('/currency/<int:currency_id>')
